@@ -150,7 +150,7 @@ model.fit(x_train, y_train,
           epochs=250,
           verbose=verbose_level)
 
-score = model.evaluate(x_test, y_test, verbose=0)
+score = model.evaluate(x_test, y_test, verbose=verbose_level)
 
 # Print Total accuracy and loss
 print('Test loss:', score[0])
