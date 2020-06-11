@@ -34,55 +34,38 @@ validation_strings = []
 training_target = []
 validation_target = []
 
-memory_leak_lines = []
-heap_overflow_lines = []
-stack_overflow_lines = []
-command_injection_lines = []
 
-
-# Load Imporant Data
 print("Loading Memory Leak Data...")
 with open("../json_data/memory_leak.json", 'r', encoding = "ISO-8859-1") as f:
-    lines = f.readlines()
-    for line in lines:
-        if "\"function\" : " in line:
-            temp = (line.split(":")[1]).strip()
-            temp = temp.strip(",")
-            training_strings.append(temp.strip("\""))
-            training_target.append(0);
+    memory_leak_json = json.loads(f.read())
+    for function in memory_leak_json["functions"]:
+        training_strings.append(function["function"])
+        training_target.append(0);
+
 print("Done.")
 
 print("Loading Heap Overflow Data...")
 with open("../json_data/heap_overflow.json", 'r', encoding = "ISO-8859-1") as f:
-    lines = f.readlines()
-    for line in lines:
-        if "\"function\" : " in line:
-            temp = (line.split(":")[1]).strip()
-            temp = temp.strip(",")
-            training_strings.append(temp.strip("\""))
-            training_target.append(1);
+    heap_overflow_json = json.loads(f.read())
+    for function in memory_leak_json["functions"]:
+        training_strings.append(function["function"])
+        training_target.append(1);
 print("Done.")
 
 print("Loading Stack Overflow Data...")
 with open("../json_data/stack_overflow.json", 'r', encoding = "ISO-8859-1") as f:
-    lines = f.readlines()
-    for line in lines:
-        if "\"function\" : " in line:
-            temp = (line.split(":")[1]).strip()
-            temp = temp.strip(",")
-            training_strings.append(temp.strip("\""))
-            training_target.append(2);
+    stack_overflow_json = json.loads(f.read())
+    for function in memory_leak_json["functions"]:
+        training_strings.append(function["function"])
+        training_target.append(2);
 print("Done.")
 
 print("Loading Command Injection Data...")
 with open("../json_data/command_injection.json", 'r', encoding = "ISO-8859-1") as f:
-    lines = f.readlines()
-    for line in lines:
-        if "\"function\" : " in line:
-            temp = (line.split(":")[1]).strip()
-            temp = temp.strip(",")
-            training_strings.append(temp.strip("\""))
-            training_target.append(3);
+    command_injection_json = json.loads(f.read())
+    for function in memory_leak_json["functions"]:
+        training_strings.append(function["function"])
+        training_target.append(3);
 print("Done.")
 
 count = 1
@@ -93,48 +76,8 @@ for i, element in enumerate(training_strings):
         count = 0
     count += 1
 
-print(len(training_strings))
-print(len(training_target))
-
-print(len(validation_target))
-print(len(validation_strings))
 
 """
-count = 1
-for word in memory_leak_file:
-    # Does preprocessing for training_strings and target labels
-    cleanedWord = word.strip()
-
-    if (len(cleanedWord) == 5):
-        # Reads in english words from file
-        if count == 10:
-            count = 1
-            validation_strings.append(cleanedWord)
-            validation_target.append(0)
-        else:
-            count = count + 1
-            training_strings.append(cleanedWord)
-            training_target.append(0)
-
-count = 1
-for word in germanFile:
-    # Does preprocessing for training_strings and target labels
-    cleanedWord = word.strip()
-
-
-    if (len(cleanedWord) == 5):
-        # Reads in english words from file
-        if count == 10:
-            count = 1
-            validation_strings.append(cleanedWord)
-            validation_target.append(1)
-        else:
-            count = count + 1
-            training_strings.append(cleanedWord)
-            training_target.append(1)
-
-
-
 # Convert strings to ordinal values
 training_ordinal = []
 validation_ordinal = []
