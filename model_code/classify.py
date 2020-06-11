@@ -39,34 +39,39 @@ print("Loading Memory Leak Data...")
 with open("../json_data/memory_leak.json", 'r', encoding = "ISO-8859-1") as f:
     memory_leak_json = json.loads(f.read())
     for function in memory_leak_json["functions"]:
-        training_strings.append(function["function"])
-        training_target.append(0);
-
+        if len(function["function"]) > 20:
+            training_strings.append(function["function"][0:20])
+            training_target.append(0);
 print("Done.")
+
 
 print("Loading Heap Overflow Data...")
 with open("../json_data/heap_overflow.json", 'r', encoding = "ISO-8859-1") as f:
     heap_overflow_json = json.loads(f.read())
-    for function in memory_leak_json["functions"]:
-        training_strings.append(function["function"])
-        training_target.append(1);
+    for function in heap_overflow_json["functions"]:
+        if len(function["function"]) > 20:
+            training_strings.append(function["function"][0:20])
+            training_target.append(1);
 print("Done.")
 
 print("Loading Stack Overflow Data...")
 with open("../json_data/stack_overflow.json", 'r', encoding = "ISO-8859-1") as f:
     stack_overflow_json = json.loads(f.read())
-    for function in memory_leak_json["functions"]:
-        training_strings.append(function["function"])
-        training_target.append(2);
+    for function in stack_overflow_json["functions"]:
+        if len(function["function"]) > 20:
+            training_strings.append(function["function"][0:20])
+            training_target.append(2);
 print("Done.")
 
 print("Loading Command Injection Data...")
 with open("../json_data/command_injection.json", 'r', encoding = "ISO-8859-1") as f:
     command_injection_json = json.loads(f.read())
-    for function in memory_leak_json["functions"]:
-        training_strings.append(function["function"])
-        training_target.append(3);
+    for function in command_injection_json["functions"]:
+        if len(function["function"]) > 20:
+            training_strings.append(function["function"][0:20])
+            training_target.append(3);
 print("Done.")
+
 
 count = 1
 for i, element in enumerate(training_strings):
@@ -76,8 +81,13 @@ for i, element in enumerate(training_strings):
         count = 0
     count += 1
 
-
 """
+print(len(training_strings))
+print(len(training_target))
+print(len(validation_strings))
+print(len(validation_target))
+"""
+
 # Convert strings to ordinal values
 training_ordinal = []
 validation_ordinal = []
@@ -94,51 +104,48 @@ for word in validation_strings:
         ordinal_temp.append(ord(char))
     validation_ordinal.append(ordinal_temp)
 
+# Convert list to numpy array
+x_train = np.array(training_ordinal)
+x_test = np.array(validation_ordinal)
+y_train = np.array(training_target)
+y_test = np.array(validation_target)
 
-# Training data/label pair respectively
-x_train = np.asarray(x_training, dtype=np.float32)
-y_train = np.asarray(y_training, dtype=np.float32)
-
-# Test data/label pair respectively
-x_test = np.asarray(x_testing, dtype=np.float32)
-y_test = np.asarray(y_testing, dtype=np.float32)
-
-# Reshape arrays to fit model
-x_train = x_train.reshape(x_train.shape[0], 57, 1)
-x_test = x_test.reshape(x_test.shape[0], 57, 1)
-
+# Reshape data
+x_train = x_train.reshape(x_train.shape[0], 20, 1)
+x_test = x_test.reshape(x_test.shape[0], 20, 1)
 
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
 
 # convert class vectors to binary class matrices
-y_train = keras.utils.to_categorical(y_train, 2)
-y_test = keras.utils.to_categorical(y_test, 2)
+y_train = keras.utils.to_categorical(y_train, 4)
+y_test = keras.utils.to_categorical(y_test, 4)
+
 
 ######################
 #     Build Model    #
 ######################
 
 model = Sequential()
-model.add(Flatten(input_shape=(57, 1)))
+model.add(Flatten(input_shape=(20, 1)))
 
-model.add(Dense(units=48, activation='sigmoid'))
-model.add(Dense(units=48, activation='sigmoid'))
-model.add(Dense(units=48, activation='sigmoid'))
-model.add(Dense(units=48, activation='sigmoid'))
-model.add(Dense(units=48, activation='sigmoid'))
-model.add(Dense(units=48, activation='sigmoid'))
+model.add(Dense(units=128, activation='relu'))
+model.add(Dense(units=128, activation='relu'))
+model.add(Dense(units=128, activation='relu'))
+model.add(Dense(units=128, activation='relu'))
+model.add(Dense(units=128, activation='relu'))
+model.add(Dense(units=128, activation='relu'))
 
-model.add(Dense(units=2, activation='sigmoid'))
+model.add(Dense(units=4, activation='softmax'))
 
 
-model.compile(loss='binary_crossentropy',
+model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),
               optimizer='adam',
               metrics=['accuracy'])
 
-
 model.fit(x_train, y_train,
-          validation_data=[x_test, y_test],
           batch_size=500,
           epochs=250,
           verbose=verbose_level)
@@ -148,6 +155,3 @@ score = model.evaluate(x_test, y_test, verbose=0)
 # Print Total accuracy and loss
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
-
-
-"""
