@@ -1,10 +1,18 @@
+# Static Analysis Lab Solution
+# Written by Carson Woods
+# University of Tennessee at Chattanooga
+# 2020
+
+# This is not the only way that the lab can be accomplished
+# though this solution yeilds 99% accuracy
+
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras import backend
+import numpy as np
 import json
 
 # Sets the level of verbosity for Tensorflow.
@@ -42,6 +50,7 @@ with open("../json_data/memory_leak.json", 'r', encoding = "ISO-8859-1") as f:
         if len(function["function"]) > 20:
             training_strings.append(function["function"][0:20])
             training_target.append(0);
+    del memory_leak_json
 print("Done.")
 
 
@@ -52,6 +61,7 @@ with open("../json_data/heap_overflow.json", 'r', encoding = "ISO-8859-1") as f:
         if len(function["function"]) > 20:
             training_strings.append(function["function"][0:20])
             training_target.append(1);
+    del heap_overflow_json
 print("Done.")
 
 print("Loading Stack Overflow Data...")
@@ -61,6 +71,7 @@ with open("../json_data/stack_overflow.json", 'r', encoding = "ISO-8859-1") as f
         if len(function["function"]) > 20:
             training_strings.append(function["function"][0:20])
             training_target.append(2);
+    del stack_overflow_json
 print("Done.")
 
 print("Loading Command Injection Data...")
@@ -70,6 +81,7 @@ with open("../json_data/command_injection.json", 'r', encoding = "ISO-8859-1") a
         if len(function["function"]) > 20:
             training_strings.append(function["function"][0:20])
             training_target.append(3);
+    del command_injection_json
 print("Done.")
 
 
@@ -104,11 +116,20 @@ for word in validation_strings:
         ordinal_temp.append(ord(char))
     validation_ordinal.append(ordinal_temp)
 
+# Free up unneeded variables to curb memory consumption
+del ordinal_temp
+del training_strings
+del validation_strings
+
 # Convert list to numpy array
 x_train = np.array(training_ordinal)
 x_test = np.array(validation_ordinal)
 y_train = np.array(training_target)
 y_test = np.array(validation_target)
+
+# Free up unneeded variables to curb memory consumption
+del training_target
+del validation_target
 
 # Reshape data
 x_train = x_train.reshape(x_train.shape[0], 20, 1)
